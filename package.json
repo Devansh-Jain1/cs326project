@@ -1,0 +1,19 @@
+{
+  "name": "my-web-application",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server src/frontend -p 3000 -c-1 -o -s"
+  },
+  "keywords": [],
+  "author": {
+    "name": "Devansh Jain",
+    "email": "dkjain@umass.edu"
+  },
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}
