@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calendar</title>
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            font-family: Arial, sans-serif;
+        }
+        .calendar-container {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            width: 300px;
+        }
+        .calendar-container h1 {
+            margin-bottom: 20px;
+        }
+        .calendar-container input {
+            margin-bottom: 10px;
+            padding: 5px;
+            width: calc(100% - 12px);
+        }
+        .calendar-container button {
+            padding: 5px 10px;
+            margin-bottom: 20px;
+        }
+        .calendar-container ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        .calendar-container li {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 5px;
+            background-color: #e0e0e0;
+            margin-bottom: 5px;
+            border-radius: 5px;
+        }
+        .calendar-container li button {
+            padding: 2px 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calendar-container">
+        <h1>Calendar</h1>
+        <input type="text" id="class-name" placeholder="Enter class name">
+        <input type="text" id="assignment" placeholder="Enter assignment">
+        <input type="date" id="date">
+        <button onclick="addEvent()">Add Event</button>
+
+        <h2>Events</h2>
+        <ul id="events-list"></ul>
+    </div>
+
+    <script>
+        async function addEvent() {
+            const className = document.getElementById('class-name').value;
+            const assignment = document.getElementById('assignment').value;
+            const date = document.getElementById('date').value;
+
+            const event = {
+                className,
+                assignment,
+                date
+            };
+
+            try {
+                const response = await fetch('/api/events', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(event)
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    console.log('Event added:', result);
+                    getEvents();
+                } else {
+                    console.error('Failed to add event');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        async function getEvents() {
+            try {
+                const response = await fetch('/api/events');
+                if (response.ok) {
+                    const events = await response.json();
+                    displayEvents(events);
+                } else {
+                    console.error('Failed to retrieve events');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        function displayEvents(events) {
+            const eventsList = document.getElementById('events-list');
+            eventsList.innerHTML = '';
+
+            events.forEach(event => {
+                const listItem = document.createElement('li');
+                listItem.innerHTML = `
+                    <span>${event.className}: ${event.assignment} (Date: ${event.date})</span>
+                    <button onclick="deleteEvent('${event._id}')">Remove</button>
+                `;
+                eventsList.appendChild(listItem);
+            });
+        }
+
+        async function deleteEvent(eventId) {
+            try {
+                const response = await fetch(`/api/events/${eventId}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    console.log('Event deleted');
+                    getEvents();
+                } else {
+                    console.error('Failed to delete event');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', getEvents);
+    </script>
+</body>
+</html>
